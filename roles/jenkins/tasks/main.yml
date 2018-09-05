@@ -1,0 +1,11 @@
+---
+# tasks file for jenkins
+
+- name: Check facts before instaletion Jenkins
+  setup:
+    filter: ansible_local
+
+
+- include_tasks: install.yml
+  when: (ansible_local.jenkins is not defined) or
+        (ansible_local.jenkins.configured != 'yes')

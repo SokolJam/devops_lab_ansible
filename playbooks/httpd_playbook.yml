@@ -1,0 +1,17 @@
+- name: Install httpd, as a frontend web server
+  hosts: webservers
+  
+  roles:
+  - user
+  - role: httpd
+    tags:
+    - webserver
+  - role: my_test
+    vars:
+      process: httpd
+      owner: apache
+      port: 80
+    tags:
+    - webserver
+    - tests
+ 

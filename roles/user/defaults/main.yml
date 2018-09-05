@@ -1,0 +1,8 @@
+---
+# defaults file for user
+user_id: 5000
+user_name: devops
+user_group: "{{ user_name }}"
+group_id: "{{ user_id }}"
+home_dir: "/home/{{ user_name }}/"
+

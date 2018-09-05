@@ -1,0 +1,21 @@
+
+- import_playbook: playbooks/httpd_playbook.yml
+- import_playbook: playbooks/jenkins_playbook.yml
+
+- name: Playbook which uses Block/Rescue/Always
+  hosts: localhost
+ 
+  tasks:
+  - block:
+    - debug: msg='This block execute normally'
+    - command: /bin/false
+    - debug: msg='This block never execute, cause ERROR!'
+
+    rescue:
+    - debug: msg='I caught an error'
+    - command: /bin/false
+    - debug: msg='This block also never execute :-('
+
+    always:
+    - debug: msg="This block ALWAYS executes"
+

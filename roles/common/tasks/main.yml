@@ -1,0 +1,20 @@
+---
+# tasks file for common
+
+- name: Esure Ansible Facts Dir exists
+  file: path=/etc/ansible/facts.d state=directory recurse=yes
+  become: yes
+
+- name: Install the libraries for the Python 
+  yum:
+    name: "{{item}}"
+    state: latest 
+  with_items:
+   - python-pip
+   - python-devel
+  become: yes
+
+- name: install psutil
+  pip: name=psutil
+  become: yes
+

@@ -1,0 +1,21 @@
+- name: Install Jenkins, as a backand application server
+  hosts: appservers
+ 
+  vars:
+    jenkins_v: latest
+  
+  roles:
+  - user
+  - role: jenkins
+    tags:
+    - appserver
+  - role: my_test
+    vars:
+      process: java
+      owner: jenkins
+      port: 8080
+      server: "localhost:8080/login"
+      content: Jenkins
+    tags:
+    - appserver
+    - tests

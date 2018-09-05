@@ -1,0 +1,13 @@
+---
+# handlers file for jenkins
+
+- name: Restart Jenkins service
+  systemd:
+    name: jenkins
+    state: restarted
+    enabled: yes
+    daemon_reload: yes
+  become: yes
+
+
+

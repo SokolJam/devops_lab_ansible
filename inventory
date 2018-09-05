@@ -1,0 +1,12 @@
+[webservers]
+webserver ansible_host=192.168.10.2
+
+
+[appservers]
+appserver ansible_host=192.168.10.3 node_name=jenkins
+
+
+[all:vars]
+ansible_user=devops
+ansible_connection=ssh
+

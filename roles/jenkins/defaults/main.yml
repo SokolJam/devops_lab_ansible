@@ -1,0 +1,9 @@
+---
+# defaults file for jenkins
+
+jenkins_uid: '5001'
+jenkins_u_name: jenkins
+jenkins_url: http://mirrors.jenkins.io/war-stable/{{ jenkins_v }}/jenkins.war
+jenkins_path: /opt/jenkins
+jenkins_home: /opt/jenkins/master
+jenkins_java_opts: "-Xmx512M"

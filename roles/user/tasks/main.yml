@@ -1,0 +1,52 @@
+---
+# tasks file for user
+
+- name: Create group
+  group:
+    name: "{{ user_group }}"
+    gid: "{{ group_id }}"
+  register: create_group_info
+  become: yes
+
+- name: Create user
+  user:
+    name: "{{ user_name }}"
+    group: "{{ user_group }}"
+    groups: "{{ second_group | default('') }}"
+    home: "{{ home_dir | default(omit)  }}"
+    create_home: "{{ create_home_bool | default(true) }}"
+    uid: "{{ user_id }}"
+  register: create_user_info
+  become: yes
+
+- name: Configure ssh access with ssh-keys
+  authorized_key:
+    user: "{{ user_name }}"
+    key: "{{ lookup('file', 'ansible.pub') }}"
+    state: present
+  become: yes
+
+- name: Grant “{{ user_name }}” user all necessary system’s privileges
+  template:
+    src: sudoers.j2
+    dest: "/etc/sudoers.d/{{ user_name }}"
+    mode: 0440
+    owner: root
+    group: root
+    validate: 'visudo -cf %s'
+  become: yes
+
+- name: save user details
+  copy:
+    content: >
+        {
+          "user_name": "{{ create_user_info.name }}",
+          "home_dir:": "{{ create_user_info.home }}",
+          "user_id": "{{ create_user_info.uid }}",
+          "group": "{{ create_group_info.name }}",
+          "group_id": "{{ create_group_info.gid }}",
+          "secondary_group": "{{ create_user_info.groups }}"
+            }
+    dest: /etc/ansible/facts.d/{{ user_name }}_user.fact
+  become: yes
+

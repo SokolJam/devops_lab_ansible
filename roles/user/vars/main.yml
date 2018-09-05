@@ -1,0 +1,5 @@
+---
+# vars file for devops_user
+
+ansible_user: vagrant
+ansible_ssh_pass: vagrant

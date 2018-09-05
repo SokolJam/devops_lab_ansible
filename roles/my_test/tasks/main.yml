@@ -1,0 +1,11 @@
+---
+# tasks file for my_test
+
+- name: Start my custom module
+  ysokal_module:
+    process: "{{ process }}"
+    owner: "{{ owner }}"
+    port: "{{ port }}"
+    server: "{{ server | default(omit) }}" 
+    content: "{{ content | default(omit) }}"
+  become: yes 

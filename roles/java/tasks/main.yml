@@ -1,0 +1,52 @@
+---
+# tasks file for java
+
+- name: Get facts about host before install Java
+  setup:
+    filter: ansible_local
+
+- name: Create directory for Java
+  file:
+    path: "{{ java_path }}"
+    state: directory 
+    recurse: yes
+  become: yes
+  when: (ansible_local.java is not defined) or 
+        (ansible_local.java.version != java_release)
+
+- name: Check existing and unarchive java
+  unarchive:
+    src: "jre-{{ java_release }}-linux-x64_bin.tar.gz"
+    dest: "{{ java_path }}"
+    extra_opts: "--strip-components=1"
+  ignore_errors: yes
+  register: java_info
+  become: yes
+  notify:
+   - Save Java details
+  when: (ansible_local.java is not defined) or
+        (ansible_local.java.version != java_release)
+
+- name: Fail
+  fail:
+    msg: |
+     ---=== Chosen version of java not find on local repository! ===---
+  when: java_info is failed
+
+- name:  Registers java/javac/jar in alternatives
+  alternatives:
+    name: java
+    link: /usr/bin/java
+    path: "{{ java_path }}/bin/java"
+    priority: 1
+  notify:
+  - validate java
+  become: yes
+
+- name: Java Build
+  shell: java -version 2>&1 | grep "Server VM"
+  register: java_build
+  changed_when: False
+
+
+

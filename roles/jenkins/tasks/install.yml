@@ -1,0 +1,78 @@
+
+- name: Delete previous facts from jenkins.fact
+  copy:
+    content: >
+       {
+        "configured": "no"
+        }
+    dest: /etc/ansible/facts.d/jenkins.fact
+  become: yes
+
+- name: Create Jenkins user
+  user:
+    name: "{{ jenkins_u_name }}"
+    uid: '{{ jenkins_uid }}'
+    home: '{{ jenkins_path }}'
+    state: present
+  become: yes
+  
+- name: Check jenkins.war on local and copy if it enable
+  copy:
+    src: jenkins.war
+    dest: "{{ jenkins_path }}"
+  register: check_result
+  become: yes
+
+- name: Download Jenkins
+  get_url:
+    url: '{{ jenkins_url }}'
+    dest: '{{ jenkins_path }}/jenkins.war'
+    owner: "{{ jenkins_u_name }}"
+    group: "{{ jenkins_u_name }}"
+  become: yes
+  when: check_result is failed
+
+- name: Create systemd file for Jenkins
+  template:
+    src: jenkins.j2
+    dest: "/etc/systemd/system/{{ jenkins_u_name }}.service"
+    mode: 0655
+    owner: root
+    group: root
+  notify:
+  - Restart Jenkins service
+  become: yes
+
+- name: start Jenkins service
+  systemd: 
+    name: jenkins
+    state: started 
+    enabled: yes
+    daemon_reload: yes
+  become: yes
+
+- name: Get jenkins status information
+  shell: "systemctl status jenkins 2>&1 | grep Active | awk '{ print substr($0, index($0,$2)) }'"
+  register: jenkins_status
+  changed_when: False
+  become: yes
+
+- name: Get jenkins version
+  shell: "java -jar /opt/jenkins/jenkins.war --version" 
+  register: j_version
+  changed_when: False
+  become: yes
+
+- name: Save Jenkins details
+  copy: 
+    content: >
+      {	
+        "status": "{{ jenkins_status.stdout }}",
+        "version": "{{ j_version.stdout }}",
+        "JENKINS_PATH": "{{ jenkins_path }}",
+        "JENKINS_HOME": "{{ jenkins_home }}",
+        "configured": "yes"
+       }
+    dest: /etc/ansible/facts.d/jenkins.fact
+  become: yes
+

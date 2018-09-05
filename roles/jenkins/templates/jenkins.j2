@@ -1,0 +1,16 @@
+[Unit]
+Description=Jenkins
+After=network.target
+Requires=network.target
+
+[Service]
+User=jenkins
+Group=jenkins
+Environment=JENKINS_HOME={{ jenkins_home }}
+Environment=JAVA_OPTS="$JAVA_OPTS {{ jenkins_java_opts }}"
+ExecStart=/usr/bin/java -jar {{ jenkins_path }}/jenkins.war
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

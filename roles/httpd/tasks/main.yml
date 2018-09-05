@@ -1,0 +1,47 @@
+---
+# tasks file for httpd
+
+- name: Installing httpd Package
+  yum: name=httpd state=installed
+  become: yes
+
+- name: Configuring vhost
+  template:
+    src: vhosts.j2
+    dest: "/etc/httpd/conf.d/{{ hostvars['appserver'].node_name }}.conf"
+    mode: 0644
+    owner: root
+    group: root
+  notify:
+    - restart httpd service
+  become: yes
+
+- name: start httpd service
+  systemd: 
+    name: httpd
+    state: started 
+    enabled: yes
+  become: yes
+
+- name: Get httpd status information
+  shell: "systemctl status httpd 2>&1 | grep Active | awk '{ print substr($0, index($0,$2)) }'"
+  register: httpd_status
+  changed_when: False
+
+
+- name: Get httpd version 
+  shell: /usr/sbin/httpd -v 2>&1 | grep "Server version" | awk '{ print $3 }'
+  register: httpd_version
+  changed_when: False
+
+- name: save httpd details
+  copy: 
+    content: >
+      {	
+        "status": "{{ httpd_status.stdout }}", 
+        "version": "{{ httpd_version.stdout }}",
+        }
+    dest: /etc/ansible/facts.d/httpd.fact
+  become: yes
+
+

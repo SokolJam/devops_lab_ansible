@@ -1,0 +1,16 @@
+---
+# handlers file for user
+
+- name: save user details
+  copy: 
+    content: >
+        {
+          "user_name": "{{ create_user_info.name }}",
+          "home_dir:": "{{ create_user_info.home }}",
+          "user_id": "{{ create_user_info.uid }}",
+          "group": "{{ create_group_info.name }}",
+          "group_id": "{{ create_group_info.gid }}",
+          "secondary_group": "{{ create_user_info.groups }}"
+            } 
+    dest: /etc/ansible/facts.d/{{ user_name }}_user.fact
+  become: yes
